@@ -1,19 +1,60 @@
-﻿@page "/counter"
+﻿@page "/register"
 @rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Student Registration</PageTitle>
 
-<h1>Counter</h1>
+<h1>Student Registration</h1>
 
-<p role="status">Current count: @currentCount</p>
+<EditForm Model="@student" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    <div class="mb-3">
+        <label for="name" class="form-label">Full Name</label>
+        <InputText id="name" class="form-control" @bind-Value="student.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <InputText id="email" type="email" class="form-control" @bind-Value="student.Email" />
+    </div>
+
+    <div class="mb-3">
+        <label for="phone" class="form-label">Phone Number</label>
+        <InputText id="phone" class="form-control" @bind-Value="student.PhoneNumber" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+@if (isPaymentVisible)
+{
+    <div class="mt-4">
+        <h3>Make Payment</h3>
+        <button class="btn btn-success" @onclick="MakePayment">Pay Registration Fee</button>
+    </div>
+}
 
 @code {
-    private int currentCount = 0;
+    private Student student = new Student();
+    private bool isPaymentVisible = false;
 
-    private void IncrementCount()
+    private void HandleValidSubmit()
     {
-        currentCount++;
+        // Logic to handle registration (e.g., save to database)
+        isPaymentVisible = true;
+    }
+
+    private void MakePayment()
+    {
+        // Logic to handle payment
+        Console.WriteLine("Payment processed!");
+    }
+
+    public class Student
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }
