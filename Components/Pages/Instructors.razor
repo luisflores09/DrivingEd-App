@@ -3,42 +3,49 @@
 
 <PageTitle>Instructors</PageTitle>
 
-<h1>Instructors</h1>
+<h1 class="text-center my-4">Instructors</h1>
 
 @if (instructors == null)
 {
-    <p><em>Loading...</em></p>
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+        <p><em>Loading...</em></p>
+    </div>
 }
 else if (!instructors.Any())
 {
-    <p><em>No instructors found.</em></p>
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+        <p><em>No instructors found.</em></p>
+    </div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Picture</th>
-                <th>Name</th>
-                <th>Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var instructor in instructors)
-            {
+    <div class="container">
+        <table class="table table-hover table-bordered table-striped">
+            <thead class="thead-dark">
                 <tr>
-                    <td>
-                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Instructor Picture" class="img-thumbnail"
-                            style="width: 100px; height: 100px;" />
-                    </td>
-                    <td>@instructor.Name</td>
-                    <td>@instructor.Email</td>
+                    <th class="text-center">Picture</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var instructor in instructors)
+                {
+                    <tr>
+                        <td class="text-center">
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Instructor Picture" class="rounded-circle"
+                                style="width: 80px; height: 80px;" />
+                        </td>
+                        <td>@instructor.FirstName</td>
+                        <td>@instructor.LastName</td>
+                        <td>@instructor.Email</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
-
 
 @code {
     private List<User>? instructors;
@@ -60,7 +67,8 @@ else
 
     private class User
     {
-        public string Name { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string ProfilePictureUrl { get; set; } = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
     }

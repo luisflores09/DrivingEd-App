@@ -42,14 +42,14 @@
     <div class="mb-3">
         <label for="role" class="form-label">Role</label>
         <select id="role" class="form-select" @bind="user.Role">
-            <option value="0">Select Role</option>
-            <option value="1">Admin</option>
-            <option value="2">Instructor</option>
-            <option value="3">Student</option>
+            <option value="">Select Role</option>
+            <option value="0">Admin</option>
+            <option value="1">Instructor</option>
+            <option value="2">Student</option>
         </select>
     </div>
 
-    @if (user.Role == 1 || user.Role == 2)
+    @if (user.Role == 0 || user.Role == 1)
     {
         <div class="mb-3">
             <label for="invitationCode" class="form-label">Invitation Code</label>

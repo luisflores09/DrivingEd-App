@@ -1,0 +1,123 @@
+﻿@page "/allusers"
+@rendermode InteractiveServer
+
+<PageTitle>All Users</PageTitle>
+
+<h1 class="text-center my-4">All Users</h1>
+
+@if (users == null)
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+        <p><em>Loading...</em></p>
+    </div>
+}
+else if (!users.Any())
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+        <p><em>No users found.</em></p>
+    </div>
+}
+else
+{
+    <div class="container">
+        <table class="table table-hover table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th class="text-center">Picture</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td class="text-center">
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User Picture" class="rounded-circle"
+                                style="width: 80px; height: 80px;" />
+                        </td>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.Email</td>
+                        <td>@user.Role</td>
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => UpdateUser(user.Id)">Update</button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user.Id)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<User>? users;
+
+    [Inject]
+    private IJSRuntime? JSRuntime { get; set; }
+
+    [Inject]
+    private IHttpClientFactory? HttpClientFactory { get; set; }
+
+    private HttpClient Http => HttpClientFactory?.CreateClient("BackendAPI") ?? throw new InvalidOperationException("HttpClientFactory is not initialized.");
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var apiUrl = "http://localhost:5256/api/user";
+            users = await Http.GetFromJsonAsync<List<User>>(apiUrl);
+            Console.WriteLine($"Fetched {users?.Count} users from API.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching users: {ex.Message}");
+            users = new List<User>();
+        }
+    }
+
+    private async Task UpdateUser(int userId)
+    {
+        Console.WriteLine($"Update user with ID: {userId}");
+        // Add logic to navigate to an update page or open a modal for editing
+        
+    }
+
+    private async Task DeleteUser(int userId)
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete user with ID {userId}?");
+        if (!confirm) return;
+
+        try
+        {
+            var response = await Http.DeleteAsync($"http://localhost:5256/api/user/{userId}");
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"User with ID {userId} deleted successfully.");
+                users = users?.Where(u => u.Id != userId).ToList();
+            }
+            else
+            {
+                Console.WriteLine($"Failed to delete user with ID {userId}. Response: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting user with ID {userId}: {ex.Message}");
+        }
+    }
+
+    private class User
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public int Role { get; set; }
+        public string ProfilePictureUrl { get; set; } = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    }
+}
