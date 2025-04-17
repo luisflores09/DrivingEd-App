@@ -1,0 +1,172 @@
+﻿@page "/register"
+@rendermode InteractiveServer
+
+<PageTitle>User Registration</PageTitle>
+
+<h1>User Registration</h1>
+
+<EditForm Model="@user" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="firstName" class="form-label">First Name</label>
+        <InputText id="firstName" class="form-control" @bind-Value="user.FirstName" />
+    </div>
+
+    <div class="mb-3">
+        <label for="lastName" class="form-label">Last Name</label>
+        <InputText id="lastName" class="form-control" @bind-Value="user.LastName" />
+    </div>
+
+    <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <InputText id="username" class="form-control" @bind-Value="user.UserName" />
+    </div>
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <InputText id="email" type="email" class="form-control" @bind-Value="user.Email" />
+    </div>
+
+    <div class="mb-3">
+        <label for="phone" class="form-label">Phone Number</label>
+        <InputText id="phone" class="form-control" @bind-Value="user.PhoneNumber" />
+    </div>
+
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="user.Password" />
+    </div>
+
+    <div class="mb-3">
+        <label for="role" class="form-label">Role</label>
+        <select id="role" class="form-select" @bind="user.Role">
+            <option value="0">Select Role</option>
+            <option value="1">Admin</option>
+            <option value="2">Instructor</option>
+            <option value="3">Student</option>
+        </select>
+    </div>
+
+    @if (user.Role == 1 || user.Role == 2)
+    {
+        <div class="mb-3">
+            <label for="invitationCode" class="form-label">Invitation Code</label>
+            <InputText id="invitationCode" class="form-control" @bind-Value="user.InvitationCode" />
+        </div>
+    }
+
+    <div class="mb-3">
+        <label for="licenseNumber" class="form-label">License Number</label>
+        <InputText id="licenseNumber" class="form-control" @bind-Value="user.LicenseNumber" />
+    </div>
+
+    <div class="mb-3">
+        <label for="vehicleDetails" class="form-label">Vehicle Details</label>
+        <InputText id="vehicleDetails" class="form-control" @bind-Value="user.VehicleDetails" />
+    </div>
+
+    <div class="mb-3">
+        <label for="profilePictureUrl" class="form-label">Profile Picture URL</label>
+        <InputText id="profilePictureUrl" class="form-control" @bind-Value="user.ProfilePictureUrl" />
+    </div>
+
+    <div class="mb-3">
+        <label for="bio" class="form-label">Bio</label>
+        <InputTextArea id="bio" class="form-control" @bind-Value="user.Bio" />
+    </div>
+
+    <div class="mb-3">
+        <label for="address" class="form-label">Address</label>
+        <InputText id="address" class="form-control" @bind-Value="user.Address" />
+    </div>
+
+    <div class="mb-3">
+        <label for="dateOfBirth" class="form-label">Date of Birth</label>
+        <InputDate id="dateOfBirth" class="form-control" @bind-Value="user.DateOfBirth" />
+    </div>
+
+    <div class="mb-3">
+        <label for="emergencyContactName" class="form-label">Emergency Contact Name</label>
+        <InputText id="emergencyContactName" class="form-control" @bind-Value="user.EmergencyContactName" />
+    </div>
+
+    <div class="mb-3">
+        <label for="emergencyContactPhone" class="form-label">Emergency Contact Phone</label>
+        <InputText id="emergencyContactPhone" class="form-control" @bind-Value="user.EmergencyContactPhone" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+@if (isPaymentVisible)
+{
+    <div class="mt-4">
+        <h3>Make Payment</h3>
+        <button class="btn btn-success" @onclick="MakePayment">Pay Registration Fee</button>
+    </div>
+}
+
+@code {
+    private User user = new User();
+    private bool isPaymentVisible = false;
+
+    [Inject]
+    private IHttpClientFactory? HttpClientFactory { get; set; }
+
+    private HttpClient Http => HttpClientFactory.CreateClient("BackendAPI");
+
+    private async Task HandleValidSubmit()
+    {
+        if ((user.Role == 1 || user.Role == 2) && string.IsNullOrWhiteSpace(user.InvitationCode))
+        {
+            Console.WriteLine("Invitation code is required for Admin or Instructor roles.");
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("http://localhost:5256/api/user", user);
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("User registered successfully.");
+                isPaymentVisible = true;
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Failed to register user. Response: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private void MakePayment()
+    {
+        Console.WriteLine("Payment processed!");
+    }
+
+    public class User
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public int Role { get; set; }
+        public string? InvitationCode { get; set; }
+        public string? LicenseNumber { get; set; }
+        public string? VehicleDetails { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+        public string? Bio { get; set; }
+        public string? Address { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string? EmergencyContactName { get; set; }
+        public string? EmergencyContactPhone { get; set; }
+    }
+}
