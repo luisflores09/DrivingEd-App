@@ -54,7 +54,6 @@ else
     </div>
 }
 
-<!-- Modal for Editing User -->
 @if (isEditModalVisible)
 {
     <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
@@ -112,7 +111,8 @@ else
     [Inject]
     private IHttpClientFactory? HttpClientFactory { get; set; }
 
-    private HttpClient Http => HttpClientFactory?.CreateClient("BackendAPI") ?? throw new InvalidOperationException("HttpClientFactory is not initialized.");
+    private HttpClient Http => HttpClientFactory?.CreateClient("BackendAPI") ?? throw new
+    InvalidOperationException("HttpClientFactory is not initialized.");
 
     protected override async Task OnInitializedAsync()
     {
