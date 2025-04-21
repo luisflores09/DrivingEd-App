@@ -42,7 +42,9 @@ else
                         <td>@user.FirstName</td>
                         <td>@user.LastName</td>
                         <td>@user.Email</td>
-                        <td>@user.Role</td>
+                        <td>
+                            @GetRoleName(user.Role.ToString())
+                        </td>
                         <td class="text-center">
                             <button class="btn btn-warning btn-sm me-2" @onclick="() => OpenEditModal(user)">Update</button>
                             <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user.Id)">Delete</button>
@@ -54,7 +56,7 @@ else
     </div>
 }
 
-@if (isEditModalVisible)
+@if (isEditModalVisible && selectedUser != null)
 {
     <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="modal-dialog">
@@ -86,9 +88,9 @@ else
                         <div class="mb-3">
                             <label for="role" class="form-label">Role</label>
                             <select id="role" class="form-select" @bind="selectedUser.Role">
-                                <option value="0">Admin</option>
-                                <option value="1">Instructor</option>
-                                <option value="2">Student</option>
+                                <option value=0>Admin</option>
+                                <option value=1>Instructor</option>
+                                <option value=2>Student</option>
                             </select>
                         </div>
 
@@ -101,12 +103,22 @@ else
 }
 
 @code {
+    [Inject]
+    private IJSRuntime? JSRuntime { get; set; }
+
     private List<User>? users;
     private User? selectedUser;
     private bool isEditModalVisible = false;
-
-    [Inject]
-    private IJSRuntime? JSRuntime { get; set; }
+    private string GetRoleName(string role)
+    {
+        return role switch
+        {
+            "0" => "Admin",
+            "1" => "Instructor",
+            "2" => "Student",
+            _ => "Unknown"
+        };
+    }
 
     [Inject]
     private IHttpClientFactory? HttpClientFactory { get; set; }
@@ -180,6 +192,12 @@ else
 
     private async Task DeleteUser(int userId)
     {
+        if (JSRuntime == null)
+        {
+            Console.WriteLine("JSRuntime is not initialized.");
+            return;
+        }
+
         var confirm = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete user with ID {userId}?");
         if (!confirm) return;
 

@@ -1,0 +1,91 @@
+@page "/appointments"
+@inject HttpClient Http
+
+<PageTitle>Appointments</PageTitle>
+
+<h1 class="text-center my-4">Appointments</h1>
+
+@if (appointments == null)
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+        <p><em>Loading...</em></p>
+    </div>
+}
+else if (!appointments.Any())
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+        <p><em>No appointments found.</em></p>
+    </div>
+}
+else
+{
+    <div class="container">
+        <div class="row">
+            @foreach (var appointment in appointments)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Instructor: @appointment.Instructor.FirstName @appointment.Instructor.LastName</h5>
+                            <h5 class="card-title">Student: @appointment.Student.FirstName @appointment.Student.LastName</h5>
+                            <p class="card-text">
+                                <strong>Date:</strong> @appointment.DateTime.ToShortDateString()<br />
+                                <strong>Time:</strong> @appointment.Time.ToString(@"hh\:mm")<br />
+                                <strong>Location:</strong> @appointment.Location<br />
+                                <strong>Status:</strong> @((AppointmentStatus)appointment.Status)<br />
+                                <strong>Notes:</strong> @appointment.Notes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private List<ScheduledAppointment>? appointments;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var apiUrl = "http://localhost:5256/api/Appointment";
+            appointments = await Http.GetFromJsonAsync<List<ScheduledAppointment>>(apiUrl);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching appointments: {ex.Message}");
+            appointments = new List<ScheduledAppointment>();
+        }
+    }
+
+    private class ScheduledAppointment
+    {
+        public int InstructorId { get; set; }
+        public User Instructor { get; set; } = new User();
+        public int StudentId { get; set; }
+        public User Student { get; set; } = new User();
+        public DateTime DateTime { get; set; }
+        public TimeSpan Time { get; set; }
+        public string Location { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
+        public int Status { get; set; }
+        public bool IsCancelled { get; set; }
+    }
+
+    private class User
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+    }
+
+    private enum AppointmentStatus
+    {
+        Pending,
+        Confirmed,
+        Completed,
+        Cancelled,
+        Rescheduled
+    }
+}

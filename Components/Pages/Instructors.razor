@@ -1,5 +1,5 @@
 ﻿@page "/instructors"
-@attribute [StreamRendering]
+@rendermode InteractiveServer
 
 <PageTitle>Instructors</PageTitle>
 
@@ -27,6 +27,7 @@ else
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Email</th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,12 +35,17 @@ else
                 {
                     <tr>
                         <td class="text-center">
-                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Instructor Picture" class="rounded-circle"
+                            <img src="@instructor.ProfilePictureUrl" alt="Instructor Picture" class="rounded-circle"
                                 style="width: 80px; height: 80px;" />
                         </td>
                         <td>@instructor.FirstName</td>
                         <td>@instructor.LastName</td>
                         <td>@instructor.Email</td>
+                        <td class="text-center">
+                            <button class="btn btn-primary btn-sm" @onclick="() => OpenAppointmentModal(instructor)">
+                                Create Appointment
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -47,8 +53,64 @@ else
     </div>
 }
 
+@if (isModalVisible)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Appointment</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@appointment" OnValidSubmit="SubmitAppointment">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label for="dateTime" class="form-label">Date and Time</label>
+                            <InputDate id="dateTime" class="form-control" @bind-Value="appointment.DateTime" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="time" class="form-label">Time (hh:mm)</label>
+                            <InputText id="time" class="form-control" @bind-Value="timeInput" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <InputText id="location" class="form-control" @bind-Value="appointment.Location" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <InputTextArea id="notes" class="form-control" @bind-Value="appointment.Notes" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <InputSelect id="status" class="form-control" @bind-Value="appointment.Status">
+                                <option value="0">Pending</option>
+                                <option value="1">Confirmed</option>
+                                <option value="2">Completed</option>
+                                <option value="3">Cancelled</option>
+                                <option value="4">Rescheduled</option>
+                            </InputSelect>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Create</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<User>? instructors;
+    private bool isModalVisible = false;
+    private User? selectedInstructor;
+    private Appointment appointment = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,11 +127,88 @@ else
         }
     }
 
+    private void OpenAppointmentModal(User instructor)
+    {
+        Console.WriteLine("OpenAppointmentModal triggered");
+        Console.WriteLine($"Opening modal for instructor: {instructor.FirstName} {instructor.LastName}");
+        selectedInstructor = instructor;
+        appointment = new Appointment
+        {
+            InstructorId = instructor.Id,
+            StudentId = currentStudentId,
+            DateTime = DateTime.Now,
+            Time = TimeSpan.FromMinutes(60),
+            Location = string.Empty,
+            Status = 0,
+            Notes = string.Empty
+        };
+        isModalVisible = true;
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        Console.WriteLine("Closing modal...");
+        isModalVisible = false;
+        selectedInstructor = null;
+    }
+
+    private async Task SubmitAppointment()
+    {
+        try
+        {
+            if (TimeSpan.TryParse(timeInput, out var parsedTime))
+            {
+                appointment.DateTime = appointment.DateTime.Date + parsedTime; // Combine date and time
+
+                var apiUrl = "http://localhost:5256/api/Appointment";
+                using var httpClient = new HttpClient();
+                var response = await httpClient.PostAsJsonAsync(apiUrl, appointment);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Appointment created successfully.");
+                    CloseModal();
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to create appointment: {response.StatusCode}");
+                    var errorDetails = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error details: {errorDetails}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid time format. Please use hh:mm.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating appointment: {ex.Message}");
+        }
+    }
+
     private class User
     {
+        public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string ProfilePictureUrl { get; set; } = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
     }
+
+    private class Appointment
+    {
+        public int InstructorId { get; set; }
+        public int StudentId { get; set; }
+        public DateTime DateTime { get; set; }
+        public TimeSpan Time { get; set; }
+        public string Location { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
+        public int Status { get; set; } = 0; // Default to Pending
+        public bool IsCancelled { get; set; } = false; // Add this property
+    }
+
+    private int currentStudentId = 1;
+    private string timeInput = "09:00";
 }
