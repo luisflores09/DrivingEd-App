@@ -20,26 +20,24 @@ else if (!appointments.Any())
 else
 {
     <div class="container">
-        <div class="row">
-            @foreach (var appointment in appointments)
-            {
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Instructor: @appointment.Instructor.FirstName @appointment.Instructor.LastName</h5>
-                            <h5 class="card-title">Student: @appointment.Student.FirstName @appointment.Student.LastName</h5>
-                            <p class="card-text">
-                                <strong>Date:</strong> @appointment.DateTime.ToShortDateString()<br />
-                                <strong>Time:</strong> @appointment.Time.ToString(@"hh\:mm")<br />
-                                <strong>Location:</strong> @appointment.Location<br />
-                                <strong>Status:</strong> @((AppointmentStatus)appointment.Status)<br />
-                                <strong>Notes:</strong> @appointment.Notes
-                            </p>
-                        </div>
+        @foreach (var appointment in appointments.OrderBy(a => a.DateTime))
+        {
+            <div class="mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Instructor: @appointment.Instructor.FirstName @appointment.Instructor.LastName</h5>
+                        <h5 class="card-title">Student: @appointment.Student.FirstName @appointment.Student.LastName</h5>
+                        <p class="card-text">
+                            <strong>Date:</strong> @appointment.DateTime.ToShortDateString()<br />
+                            <strong>Time:</strong> @appointment.Time.ToString(@"hh\:mm")<br />
+                            <strong>Location:</strong> @appointment.Location<br />
+                            <strong>Status:</strong> @((AppointmentStatus)appointment.Status)<br />
+                            <strong>Notes:</strong> @appointment.Notes
+                        </p>
                     </div>
                 </div>
-            }
-        </div>
+            </div>
+        }
     </div>
 }
 
