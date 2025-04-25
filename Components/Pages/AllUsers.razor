@@ -46,6 +46,7 @@ else
                             @GetRoleName(user.Role.ToString())
                         </td>
                         <td class="text-center">
+                            <a class="btn btn-primary btn-sm" href="/user/@user.Id">View Details</a>
                             <button class="btn btn-warning btn-sm me-2" @onclick="() => OpenEditModal(user)">Update</button>
                             <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user.Id)">Delete</button>
                         </td>

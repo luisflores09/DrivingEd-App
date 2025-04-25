@@ -1,4 +1,5 @@
 ﻿@page "/register"
+@using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
 
 <PageTitle>User Registration</PageTitle>
@@ -113,6 +114,9 @@
     private bool isPaymentVisible = false;
 
     [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
     private IHttpClientFactory? HttpClientFactory { get; set; }
 
     private HttpClient Http => HttpClientFactory.CreateClient("BackendAPI");
@@ -132,6 +136,7 @@
             {
                 Console.WriteLine("User registered successfully.");
                 isPaymentVisible = true;
+                NavigationManager.NavigateTo("/allusers");
             }
             else
             {
@@ -151,22 +156,58 @@
     }
 
     public class User
-    {
-        public string UserName { get; set; } = string.Empty;
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public int Role { get; set; }
-        public string? InvitationCode { get; set; }
-        public string? LicenseNumber { get; set; }
-        public string? VehicleDetails { get; set; }
-        public string? ProfilePictureUrl { get; set; }
-        public string? Bio { get; set; }
-        public string? Address { get; set; }
-        public DateTime? DateOfBirth { get; set; }
-        public string? EmergencyContactName { get; set; }
-        public string? EmergencyContactPhone { get; set; }
-    }
+{
+    [Required(ErrorMessage = "First Name is required.")]
+    [StringLength(50, ErrorMessage = "First Name cannot exceed 50 characters.")]
+    public string FirstName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Last Name is required.")]
+    [StringLength(50, ErrorMessage = "Last Name cannot exceed 50 characters.")]
+    public string LastName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Username is required.")]
+    [StringLength(20, ErrorMessage = "Username cannot exceed 20 characters.")]
+    public string UserName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Invalid email format.")]
+    public string Email { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Phone Number is required.")]
+    [Phone(ErrorMessage = "Invalid phone number format.")]
+    public string PhoneNumber { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Password is required.")]
+    [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
+    public string Password { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Role is required.")]
+    public int Role { get; set; }
+
+    public string? InvitationCode { get; set; }
+
+    public string? LicenseNumber { get; set; }
+
+    public string? VehicleDetails { get; set; }
+
+    [Url(ErrorMessage = "Invalid URL format.")]
+    public string? ProfilePictureUrl { get; set; }
+
+    [StringLength(500, ErrorMessage = "Bio cannot exceed 500 characters.")]
+    public string? Bio { get; set; }
+
+    public string? Address { get; set; }
+
+    [Required(ErrorMessage = "Date of Birth is required.")]
+    [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
+    public DateTime? DateOfBirth { get; set; }
+
+    [Required(ErrorMessage = "Emergency Contact Name is required.")]
+    [StringLength(50, ErrorMessage = "Emergency Contact Name cannot exceed 50 characters.")]
+    public string? EmergencyContactName { get; set; }
+
+    [Required(ErrorMessage = "Emergency Contact Phone is required.")]
+    [Phone(ErrorMessage = "Invalid phone number format.")]
+    public string? EmergencyContactPhone { get; set; }
+}
 }
