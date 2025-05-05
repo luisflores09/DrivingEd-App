@@ -103,7 +103,10 @@ else
     </div>
 }
 
+@inject IConfiguration Configuration
+
 @code {
+    private string ApiBaseUrl => Configuration["ApiBaseUrl"] ?? string.Empty;
     [Inject]
     private IJSRuntime? JSRuntime { get; set; }
 
@@ -136,7 +139,7 @@ else
     {
         try
         {
-            var apiUrl = "http://localhost:5256/api/user";
+            var apiUrl = $"{ApiBaseUrl}";
             users = await Http.GetFromJsonAsync<List<User>>(apiUrl);
             Console.WriteLine($"Fetched {users?.Count} users from API.");
         }
@@ -173,7 +176,7 @@ else
 
         try
         {
-            var response = await Http.PutAsJsonAsync($"http://localhost:5256/api/user/{selectedUser.Id}", selectedUser);
+            var response = await Http.PutAsJsonAsync($"{ApiBaseUrl}/{selectedUser.Id}", selectedUser);
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine($"User with ID {selectedUser.Id} updated successfully.");
@@ -204,7 +207,7 @@ else
 
         try
         {
-            var response = await Http.DeleteAsync($"http://localhost:5256/api/user/{userId}");
+            var response = await Http.DeleteAsync($"{ApiBaseUrl}/{userId}");
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine($"User with ID {userId} deleted successfully.");
