@@ -139,7 +139,7 @@ else
     {
         try
         {
-            var apiUrl = $"{ApiBaseUrl}";
+            var apiUrl = $"{ApiBaseUrl}/user";
             users = await Http.GetFromJsonAsync<List<User>>(apiUrl);
             Console.WriteLine($"Fetched {users?.Count} users from API.");
         }
@@ -176,7 +176,7 @@ else
 
         try
         {
-            var response = await Http.PutAsJsonAsync($"{ApiBaseUrl}/{selectedUser.Id}", selectedUser);
+            var response = await Http.PutAsJsonAsync($"{ApiBaseUrl}/user/{selectedUser.Id}", selectedUser);
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine($"User with ID {selectedUser.Id} updated successfully.");
@@ -207,7 +207,7 @@ else
 
         try
         {
-            var response = await Http.DeleteAsync($"{ApiBaseUrl}/{userId}");
+            var response = await Http.DeleteAsync($"{ApiBaseUrl}/user/{userId}");
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine($"User with ID {userId} deleted successfully.");
