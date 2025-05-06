@@ -114,7 +114,7 @@ else
     private bool isModalVisible = false;
     private User? selectedInstructor;
     private Appointment appointment = new();
-    private string ApiBaseUrl => Configuration["ApiBaseUrl"];
+    private string ApiBaseUrl => Configuration["ApiBaseUrl"]!;
     private int currentStudentId = 1;
     private string timeInput = "09:00";
 

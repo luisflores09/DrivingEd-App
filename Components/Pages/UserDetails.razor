@@ -43,17 +43,20 @@ else
     </div>
 }
 
+@inject IConfiguration Configuration
+
 @code {
     [Parameter]
     public int userId { get; set; }
 
     private User? user;
+    private string ApiBaseUrl => Configuration["ApiBaseUrl"]!; // Dynamically fetch the base URL
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var apiUrl = $"http://localhost:5256/api/user/{userId}";
+            var apiUrl = $"{ApiBaseUrl}/user/{userId}";
             user = await Http.GetFromJsonAsync<User>(apiUrl);
         }
         catch (Exception ex)
