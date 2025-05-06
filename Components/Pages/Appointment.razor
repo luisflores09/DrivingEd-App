@@ -41,14 +41,17 @@ else
     </div>
 }
 
+@inject IConfiguration Configuration
+
 @code {
     private List<ScheduledAppointment>? appointments;
+    private string ApiBaseUrl => Configuration["ApiBaseUrl"]!; // Dynamically fetch the base URL
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var apiUrl = "http://localhost:5256/api/Appointment";
+            var apiUrl = $"{ApiBaseUrl}/Appointment";
             appointments = await Http.GetFromJsonAsync<List<ScheduledAppointment>>(apiUrl);
         }
         catch (Exception ex)
